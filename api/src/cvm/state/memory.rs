@@ -1,21 +1,12 @@
 use steel::*;
 use std::{cell::{Ref, RefMut}, marker::PhantomData};
 use crate::{
-    consts::*,
-    cvm::{
-        VirtualDurableNonce,
-        VirtualRelayAccount,
-        VirtualTimelockAccount
-    },
+    consts::*, 
     types::SliceAllocator
 };
 
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
-pub enum MemoryVersion {
-    Legacy = 0,
-    V1 = 1,
-}
+// Using packed instead of align(8) to keep compatibility with older
+// versions of the program
 
 #[repr(C, packed)] 
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
@@ -25,7 +16,8 @@ pub struct MemoryAccount {
     pub bump: u8,
 
     pub version: u8,
-    pub packed_info: [u8; 6],
+    pub account_size: u16,
+    pub num_accounts: u32,
 
     // Data starts at 72 bytes into the account
     _data: PhantomData<[u8]>,
@@ -48,7 +40,7 @@ impl MemoryAccount {
     pub fn get_capacity_and_size(info: &AccountInfo) -> (usize, usize) {
         let data = info.data.borrow();
         let info = MemoryAccount::unpack(&data);
-        (info.get_capacity(), info.get_account_size())
+        (info.num_accounts as usize, info.account_size as usize)
     }
 
     pub fn get_data<'a>(info: &'a AccountInfo) 
@@ -81,73 +73,11 @@ impl MemoryAccount {
         Ok(data)
     }
 
-    pub fn get_version(&self) -> MemoryVersion {
-        match self.version {
-            0 => MemoryVersion::Legacy,
-            1 => MemoryVersion::V1,
-            _ => panic!("Invalid memory version"),
-        }
-    }
-
     pub fn get_capacity(&self) -> usize {
-        match self.get_version() {
-            MemoryVersion::Legacy => NUM_ACCOUNTS,
-            MemoryVersion::V1 => {
-                let packed: &PackedInfoV1 = bytemuck::from_bytes(&self.packed_info);
-                packed.num_accounts as usize
-            }
-        }
+        self.num_accounts as usize
     }
 
     pub fn get_account_size(&self) -> usize {
-        match self.get_version() {
-            MemoryVersion::Legacy => {
-                let packed: &PackedInfoLegacy = bytemuck::from_bytes(&self.packed_info);
-
-                // Values pulled from:
-                // https://github.com/code-payments/code-vm/blob/acf276fce3e6858aa70e40dc99c6905f9bd655b9/api/src/cvm/state/memory.rs#L30
-
-                match packed.layout {
-                    1 => VirtualTimelockAccount::LEN + 1,
-                    2 => VirtualDurableNonce::LEN + 1,
-                    3 => VirtualRelayAccount::LEN + 1,
-                    _ => panic!("Invalid layout"),
-                }
-            }
-            MemoryVersion::V1 => {
-                let packed: &PackedInfoV1 = bytemuck::from_bytes(&self.packed_info);
-                packed.account_size as usize
-            }
-        }
+        self.account_size as usize
     }
-
-    pub fn set_num_accounts(&mut self, num_accounts: u32) {
-        if self.get_version() != MemoryVersion::V1 {
-            panic!("Setting num_accounts is only valid for V1 memory version");
-        }
-        let packed: &mut PackedInfoV1 = bytemuck::from_bytes_mut(&mut self.packed_info);
-        packed.num_accounts = num_accounts;
-    }
-
-    pub fn set_account_size(&mut self, account_size: u16) {
-        if self.get_version() != MemoryVersion::V1 {
-            panic!("Setting account_size is only valid for V1 memory version");
-        }
-        let packed: &mut PackedInfoV1 = bytemuck::from_bytes_mut(&mut self.packed_info);
-        packed.account_size = account_size;
-    }
-}
-
-#[repr(C, packed)]
-#[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
-struct PackedInfoLegacy {
-    _padding: [u8; 5],
-    pub layout: u8,
-}
-
-#[repr(C, packed)]
-#[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
-struct PackedInfoV1 {
-    pub account_size: u16,
-    pub num_accounts: u32,
 }

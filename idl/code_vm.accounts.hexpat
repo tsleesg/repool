@@ -86,24 +86,13 @@ struct VirtualAccount {
 
 struct AccountDataHeader {
     u8 version;
-
-    if (version == 0) {
-        u8 _padding[5];
-        u8 layout;
-    } else if (version == 1) {
-        u16 account_size;
-        u32 num_accounts;
-    }
+    u16 account_size;
+    u32 num_accounts;
 };
 
 struct AccountData {
     AccountDataHeader header;
-
-    if (header.version == 0) {
-        SliceAllocator<VirtualAccount, 32000> allocator;
-    } else if (header.version == 1) {
-        SliceAllocator<VirtualAccount, header.num_accounts> allocator;
-    }
+    SliceAllocator<VirtualAccount, header.num_accounts> allocator;
 };
 
 struct CodeVmAccount {
