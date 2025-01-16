@@ -15,6 +15,8 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
 test-sbf = []
+custom-heap = []
+custom-panic = []
 
 [dependencies]
 code-vm-api.workspace = true
@@ -34,3 +36,5 @@ pretty-hex = "0.4.1"
 
 [build-dependencies]
 solana-include-idl = { version = "0.1", features = ["shrink"] }
+
+

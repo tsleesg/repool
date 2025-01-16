@@ -3,7 +3,7 @@ use crate::external::*;
 use crate::types::Hash;
 use steel::*;
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_pda(mint: &Pubkey, authority: &Pubkey, lock_duration: u8) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[CODE_VM, mint.as_ref(), authority.as_ref(), &[lock_duration]],
@@ -11,12 +11,12 @@ pub fn find_vm_pda(mint: &Pubkey, authority: &Pubkey, lock_duration: u8) -> (Pub
     )
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_omnibus_pda(vm: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[CODE_VM, VM_OMNIBUS, vm.as_ref()], &crate::id())
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_memory_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[CODE_VM, VM_MEMORY_ACCOUNT, name.as_ref(), vm.as_ref()],
@@ -24,7 +24,7 @@ pub fn find_vm_memory_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u8
     )
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_storage_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[CODE_VM, VM_STORAGE_ACCOUNT, name.as_ref(), vm.as_ref()],
@@ -32,7 +32,7 @@ pub fn find_vm_storage_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u
     )
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_relay_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[CODE_VM, VM_RELAY_ACCOUNT, name.as_ref(), vm.as_ref()],
@@ -40,12 +40,12 @@ pub fn find_vm_relay_pda(vm: &Pubkey, name: &[u8; MAX_NAME_LEN]) -> (Pubkey, u8)
     )
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_vm_relay_vault_pda(relay: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[CODE_VM, VM_RELAY_VAULT, relay.as_ref()], &crate::id())
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_timelock_deposit_pda(vm: &Pubkey, depositor: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[CODE_VM, VM_DEPOSIT_PDA, depositor.as_ref(), vm.as_ref()],
@@ -134,7 +134,7 @@ pub fn create_virtual_timelock_address(
     .unwrap()
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub fn find_virtual_timelock_vault_address(timelock_address: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[VM_TIMELOCK_VAULT, timelock_address.as_ref(), &[3]],

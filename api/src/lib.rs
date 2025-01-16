@@ -10,7 +10,7 @@ pub mod opcode;
 pub mod pdas;
 pub mod external;
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 pub mod sdk;
 
 pub mod prelude {
@@ -26,10 +26,10 @@ pub mod prelude {
     pub use crate::pdas::*;
     pub use crate::external::*;
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(feature = "solana"))]
     pub use crate::sdk::*;
 }
 
 use steel::*;
 
-declare_id!("vmZ1WUq8SxjBWcaeTCvgJRZbS84R61uniFsQy5YMRTJ"); 
+declare_id!("vmZ1WUq8SxjBWcaeTCvgJRZbS84R61uniFsQy5YMRTJ");

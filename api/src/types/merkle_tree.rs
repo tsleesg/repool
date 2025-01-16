@@ -179,7 +179,7 @@ impl<const N: usize> MerkleTree<N> {
         *path.last().unwrap() == root
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(feature = "solana"))]
     fn hash_pairs(pairs: Vec<Hash>) -> Vec<Hash> {
         // A helper function that hashes all pairs of hashes into a new array of
         // hashes.
@@ -196,7 +196,7 @@ impl<const N: usize> MerkleTree<N> {
         res
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(feature = "solana"))]
     pub fn get_merkle_proof(&self, values: &[Hash], index: usize) -> Vec<Hash> {
         let mut layers = Vec::with_capacity(N);
         let mut current_layer = values.to_vec();

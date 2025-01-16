@@ -1,4 +1,4 @@
-#![cfg(not(target_os = "solana"))]
+#[cfg(not(feature = "solana"))]
 
 use steel::*;
 use crate::prelude::*;
