@@ -1,0 +1,12 @@
+[build]
+target = "bpfel-unknown-none"
+
+[target.bpfel-unknown-none]
+rustflags = [
+    "-C", "link-arg=-z",
+    "-C", "link-arg=notext",
+    "-C", "link-arg=-z",
+    "-C", "link-arg=nostack",
+    "-C", "link-arg=-z",
+    "-C", "link-arg=nocopyreloc",
+]
