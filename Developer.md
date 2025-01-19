@@ -442,7 +442,7 @@ sequenceDiagram
 
 ## Account Management & Operations Flow
 
-::: mermaid
+```mermaid
 sequenceDiagram
     participant User
     participant VirtualAccount
@@ -472,6 +472,7 @@ sequenceDiagram
         TimelockAccount->>RelayAccount: Process Withdrawal
     end
 :::
+
 
 ### Virtual Account Creation (virtual_account.rs)
 - Handles account type selection (Nonce/Timelock/Relay)
