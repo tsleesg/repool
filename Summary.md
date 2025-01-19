@@ -1,4 +1,4 @@
-# VM (Solana Program) Functional Summary
+# Relay Pool "Relay Pool" (Solana Program) Functional Summary
 
 ## 1. Core VM Management
 
