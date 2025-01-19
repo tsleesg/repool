@@ -444,25 +444,34 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+    participant User
+    participant VirtualAccount
+    participant TimelockAccount
     participant RelayAccount
-    participant MerkleTree
-    participant TokenPool
-    participant Hash
+    participant NonceAccount
 
-    rect rgb(181, 197, 50)
-        RelayAccount->>MerkleTree: Initialize Tree
-        RelayAccount->>TokenPool: Setup Treasury
+    rect rgb(43, 159, 196)
+        User->>VirtualAccount: Create Virtual Account
+        VirtualAccount->>+TimelockAccount: Initialize Timelock
+        TimelockAccount->>-VirtualAccount: Return Timelock Info
     end
     
-    rect rgb(98, 191, 70)
-        loop For Each Transaction
-            RelayAccount->>MerkleTree: Add Commitment
-            MerkleTree->>Hash: Calculate Root
-            RelayAccount->>RelayAccount: Save Recent Root
-            RelayAccount->>TokenPool: Update Balance
-        end
+    rect rgb(92, 118, 188)
+        Note over User,RelayAccount: Transfer Flow
+        User->>VirtualAccount: Request Transfer
+        VirtualAccount->>NonceAccount: Get Nonce
+        VirtualAccount->>TimelockAccount: Create Transfer Message
+        TimelockAccount->>RelayAccount: Execute Transfer
     end
 
+    rect rgb(137, 40, 137)
+        Note over User,RelayAccount: Withdraw Flow
+        User->>VirtualAccount: Request Withdraw
+        VirtualAccount->>NonceAccount: Get Nonce
+        VirtualAccount->>TimelockAccount: Create Withdraw Message
+        TimelockAccount->>RelayAccount: Process Withdrawal
+    end
+:::
 
 
 ### Virtual Account Creation (virtual_account.rs)
