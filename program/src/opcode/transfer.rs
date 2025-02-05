@@ -32,7 +32,7 @@ pub fn process_transfer(
 ) -> ProgramResult {
 
     let vm = load_vm(ctx.vm_info)?;
-    let args = TransferOp::try_from_bytes(&data.data)?;
+    let args = TransferOp::try_from_bytes(&data.data)?.to_struct()?;
 
     let mem_indicies = &data.mem_indicies;
     let mem_banks = &data.mem_banks;
@@ -100,13 +100,23 @@ pub fn process_transfer(
         hash.as_ref(),
     )?;
 
-    src_vta.balance = src_vta.balance
-        .checked_sub(args.amount)
-        .ok_or(ProgramError::ArithmeticOverflow)?;
+    if src_vta.balance < args.amount {
+        return Err(ProgramError::InsufficientFunds);
+    }
 
-    dst_vta.balance = dst_vta.balance
-        .checked_add(args.amount)
-        .ok_or(ProgramError::ArithmeticOverflow)?;
+    // If the source and destination accounts are the same, then we don't need
+    // to do anything.
+
+    let is_same_account = src_mem == dst_mem && src_index == dst_index;
+    if !is_same_account {
+        src_vta.balance = src_vta.balance
+            .checked_sub(args.amount)
+            .ok_or(ProgramError::ArithmeticOverflow)?;
+
+        dst_vta.balance = dst_vta.balance
+            .checked_add(args.amount)
+            .ok_or(ProgramError::ArithmeticOverflow)?;
+    }
 
     vdn.value = vm.get_current_poh();
 
