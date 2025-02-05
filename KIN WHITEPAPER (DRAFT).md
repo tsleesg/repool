@@ -1,5 +1,8 @@
 # Token Value Dynamics in: Arbitrage and Cost Optimisation Framework
 
+## Kinetic Index Network (KIN)
+The Kinetic Index Network, or KIN, represents a revolutionary approach to blockchain token dynamics through its multi-Relay Pool architecture. This network creates an interconnected system of value exchange, where each relay pool acts as a node in a dynamic, self-optimising network. The name "Kinetic" reflects the system's dynamic nature and continuous movement of value, while "Index" represents its role in tracking and maintaining value relationships across multiple token pairs.
+
 ## Abstract
 This paper introduces a comprehensive framework for analysing and optimising token value creation in multi-RP (Relay Pool) networks using $KIN as the common token. The model integrates three key components:
 
@@ -13,7 +16,7 @@ Through mathematical modeling and empirical analysis, we show how these componen
 
 ## Background
 
-The RP implements efficient token transfers through a chain of operations that minimise on-chain costs while maintaining security guarantees. Key features include:
+Each RP implements efficient token transfers through a chain of operations that minimise on-chain costs while maintaining security guarantees. Key features include:
 
 ### Signature Verification (api/src/utils/signature.rs)
 Cost Analysis for Internal Transfer:
