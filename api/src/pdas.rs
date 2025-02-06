@@ -276,3 +276,27 @@ pub fn find_relay_commitment_address(
 pub fn find_relay_destination(proof: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[CODE_VM, VM_RELAY_VAULT, proof.as_ref()], &splitter::ID)
 }
+
+pub fn find_vm_second_token_omnibus_pda(vm: &Pubkey) -> (Pubkey, u8) {
+    Pubkey::find_program_address(
+        &[CODE_VM, VM_SECOND_TOKEN_OMNIBUS, vm.as_ref()], 
+        &crate::id()
+    )
+}
+
+pub fn find_dual_deposit_pda(
+    vm: &Pubkey,
+    depositor: &Pubkey,
+    ratio_hash: &Hash
+) -> (Pubkey, u8) {
+    Pubkey::find_program_address(
+        &[
+            CODE_VM, 
+            VM_DUAL_DEPOSIT_PDA,
+            depositor.as_ref(),
+            ratio_hash.as_ref(),
+            vm.as_ref()
+        ],
+        &crate::id()
+    )
+}

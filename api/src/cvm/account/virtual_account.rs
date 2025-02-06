@@ -1,19 +1,20 @@
-
 use steel::*;
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use crate::{utils, types::Hash};
+use crate::types::Hash;
+use crate::prelude::DualTokenAccount;
+
 use super::{
     VirtualDurableNonce,
     VirtualTimelockAccount,
     VirtualRelayAccount,
 };
 
-
-#[derive(BorshDeserialize, BorshSerialize, Clone, Copy, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Clone, PartialEq, Debug)]
 pub enum VirtualAccount {
     Nonce(VirtualDurableNonce),
     Timelock(VirtualTimelockAccount),
+    DualToken(DualTokenAccount),
     Relay(VirtualRelayAccount),
 }
 
@@ -23,6 +24,7 @@ impl VirtualAccount {
         1 + (match self {
             VirtualAccount::Nonce(_) => VirtualDurableNonce::LEN,
             VirtualAccount::Timelock(_) => VirtualTimelockAccount::LEN,
+            VirtualAccount::DualToken(_) => DualTokenAccount::LEN,
             VirtualAccount::Relay(_) => VirtualRelayAccount::LEN,
         })
     }
@@ -39,20 +41,27 @@ impl VirtualAccount {
         matches!(self, VirtualAccount::Nonce(_))
     }
 
-    /// Get the hash of this VirtualAccount
+    pub fn is_dual_token(&self) -> bool {
+        matches!(self, VirtualAccount::DualToken(_))
+    }
+
     pub fn get_hash(&self) -> Hash {
-        utils::hash(self.pack().as_ref())
+        match self {
+            VirtualAccount::Nonce(_) => Hash::new(&self.pack()),
+            VirtualAccount::Timelock(_) => Hash::new(&self.pack()),
+            VirtualAccount::DualToken(inner) => Hash::new(&inner.instance),
+            VirtualAccount::Relay(_) => Hash::new(&self.pack()),
+        }
     }
 
     /// Pack this VirtualAccount into a byte array
     pub fn pack(&self) -> Vec<u8> {
-        // The first byte is the variant, followed by the data
-
         let mut bytes = vec![0u8; self.get_size()];
         bytes[0] = match self {
             VirtualAccount::Nonce(_) => 0,
             VirtualAccount::Timelock(_) => 1,
-            VirtualAccount::Relay(_) => 2,
+            VirtualAccount::DualToken(_) => 2,
+            VirtualAccount::Relay(_) => 3,
         };
 
         match self {
@@ -62,6 +71,9 @@ impl VirtualAccount {
             VirtualAccount::Timelock(account) => {
                 account.pack(&mut bytes[1..]).unwrap();
             },
+            VirtualAccount::DualToken(account) => {
+                account.pack(&mut bytes[1..]).unwrap();
+            },
             VirtualAccount::Relay(account) => {
                 account.pack(&mut bytes[1..]).unwrap();
             },
@@ -69,31 +81,31 @@ impl VirtualAccount {
         bytes
     }
 
-    /// Unpack a VirtualAccount from a byte array
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
-        // The first byte is the variant, followed by the data
-
         if input.len() < 1 {
             return Err(ProgramError::InvalidAccountData);
         }
 
         let variant = input[0];
         let data = &input[1..];
-        let size = get_varient_size(variant);
+        let size = get_variant_size(variant);
 
         if data.len() < size {
             return Err(ProgramError::InvalidAccountData);
-        } 
+        }
 
         match variant {
             0 => Ok(VirtualAccount::Nonce(
-                VirtualDurableNonce::unpack(&data).unwrap()
+                VirtualDurableNonce::unpack(data).unwrap()
             )),
             1 => Ok(VirtualAccount::Timelock(
-                VirtualTimelockAccount::unpack(&data).unwrap()
+                VirtualTimelockAccount::unpack(data).unwrap()
             )),
-            2 => Ok(VirtualAccount::Relay(
-                VirtualRelayAccount::unpack(&data).unwrap()
+            2 => Ok(VirtualAccount::DualToken(
+                DualTokenAccount::unpack(data).unwrap()
+            )),
+            3 => Ok(VirtualAccount::Relay(
+                VirtualRelayAccount::unpack(data).unwrap()
             )),
             _ => Err(ProgramError::InvalidAccountData)
         }
@@ -102,35 +114,40 @@ impl VirtualAccount {
 
 impl VirtualAccount {
     pub fn into_inner_nonce(self) -> Option<VirtualDurableNonce> {
-        if let VirtualAccount::Nonce(inner) = self {
-            Some(inner)
-        } else {
-            None
+        match self {
+            VirtualAccount::Nonce(inner) => Some(inner),
+            _ => None,
         }
     }
 
     pub fn into_inner_timelock(self) -> Option<VirtualTimelockAccount> {
-        if let VirtualAccount::Timelock(inner) = self {
-            Some(inner)
-        } else {
-            None
+        match self {
+            VirtualAccount::Timelock(inner) => Some(inner),
+            _ => None,
         }
     }
 
     pub fn into_inner_relay(self) -> Option<VirtualRelayAccount> {
-        if let VirtualAccount::Relay(inner) = self {
-            Some(inner)
-        } else {
-            None
+        match self {
+            VirtualAccount::Relay(inner) => Some(inner),
+            _ => None,
+        }
+    }
+
+    pub fn into_inner_dual_token(self) -> Option<DualTokenAccount> {
+        match self {
+            VirtualAccount::DualToken(inner) => Some(inner),
+            _ => None,
         }
     }
 }
 
-fn get_varient_size(variant: u8) -> usize {
+fn get_variant_size(variant: u8) -> usize {
     match variant {
         0 => VirtualDurableNonce::LEN,
         1 => VirtualTimelockAccount::LEN,
-        2 => VirtualRelayAccount::LEN,
+        2 => DualTokenAccount::LEN,
+        3 => VirtualRelayAccount::LEN,
         _ => 0,
     }
 }

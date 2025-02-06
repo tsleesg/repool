@@ -379,12 +379,12 @@ pub fn timelock_withdraw(
     unlock_pda: Pubkey,
     withdraw_receipt: Option<Pubkey>,
     external_address: Pubkey,
+    external_second_token_address: Pubkey,
+    second_token_omnibus: Option<Pubkey>,
     data: WithdrawIxData,
 ) -> Instruction {
-
-    // This instruction has 3 variants, each with a slightly different set of
+    // This instruction has 4 variants, each with a slightly different set of
     // accounts.
-
     let accounts = match data {
         WithdrawIxData::FromDeposit { .. } => 
             withdraw_from_deposit(
@@ -397,6 +397,11 @@ pub fn timelock_withdraw(
         WithdrawIxData::FromStorage { .. } => 
             withdraw_from_storage(
                 depositor, payer, vm, vm_omnibus, vm_storage, unlock_pda, withdraw_receipt, external_address),
+                
+        WithdrawIxData::FromDualToken { .. } =>
+            withdraw_from_dual_token(
+                depositor, payer, vm, vm_omnibus, vm_memory, unlock_pda, withdraw_receipt, 
+                external_address, second_token_omnibus, external_second_token_address),
     };
 
     let data = WithdrawIx::try_to_bytes(data).unwrap();
@@ -406,6 +411,38 @@ pub fn timelock_withdraw(
         accounts,
         data,
     }
+}
+
+fn withdraw_from_dual_token(
+    depositor: Pubkey,
+    payer: Pubkey,
+    vm: Pubkey,
+    vm_omnibus: Option<Pubkey>,
+    vm_memory: Option<Pubkey>,
+    unlock_pda: Pubkey,
+    withdraw_receipt: Option<Pubkey>,
+    external_address: Pubkey,
+    second_token_omnibus: Option<Pubkey>,
+    external_second_token_address: Pubkey,
+) -> Vec<AccountMeta> {
+    vec![
+        AccountMeta::new(depositor, true),
+        AccountMeta::new(payer, true),
+        AccountMeta::new(vm, false),
+        optional_meta(vm_omnibus, false),
+        optional_meta(vm_memory, false),
+        optional_meta(None, false), // vm_storage
+        optional_meta(None, false), // deposit_pda
+        optional_meta(None, false), // deposit_ata
+        AccountMeta::new(unlock_pda, false),
+        optional_meta(withdraw_receipt, false),
+        AccountMeta::new(external_address, false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+        optional_readonly_meta(Some(system_program::id()), false),
+        optional_readonly_meta(Some(solana_program::sysvar::rent::id()), false),
+        optional_meta(second_token_omnibus, false),
+        AccountMeta::new(external_second_token_address, false),
+    ]
 }
 
 fn withdraw_from_deposit(

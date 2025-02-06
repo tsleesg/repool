@@ -69,17 +69,15 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     ctx.check_unlock_state()?;
 
     match args {
-
         WithdrawIxData::FromDeposit { .. } => 
             process_withdraw_from_deposit(&ctx, &args),
-
         WithdrawIxData::FromMemory { .. } => 
             process_withdraw_from_memory(&ctx, &args),
-
         WithdrawIxData::FromStorage { .. } => 
             process_withdraw_from_storage(&ctx, &args),
-
-    }?;
+        WithdrawIxData::FromDualToken { .. } =>
+            process_withdraw_from_dual_token(&ctx, &args),
+    }?;    
 
     let vm = load_vm(ctx.vm_info)?;
 
@@ -152,15 +150,15 @@ fn process_withdraw_from_storage(
             signature,
         } => Ok((packed_va, proof, signature)),
         _ => Err(ProgramError::InvalidInstructionData),
-    }?;
+    }?;    
 
     let vm_info = ctx.vm_info;
     let vm = load_vm(vm_info)?;
 
     let va = VirtualAccount::unpack(packed_va)?;
-    let vta = va.into_inner_timelock().unwrap();
-
     let va_hash = va.get_hash();
+    let vta = va.into_inner_timelock().unwrap();
+    
     let sig_hash = hashv(&[signature.as_ref(), va_hash.as_ref()]);
 
     sig_verify(vm.authority.as_ref(), signature.as_ref(), va_hash.as_ref())?;
@@ -257,6 +255,8 @@ pub struct WithdrawContext<'a, 'b> {
     pub token_program_info: &'a AccountInfo<'b>,
     pub system_program_info: Option<&'a AccountInfo<'b>>,
     pub rent_sysvar_info: Option<&'a AccountInfo<'b>>,
+    pub second_token_omnibus: Option<&'a AccountInfo<'b>>,
+    pub external_second_token_address_info: &'a AccountInfo<'b>,
 }
 
 impl<'a, 'b> WithdrawContext<'a, 'b> {
@@ -276,8 +276,10 @@ impl<'a, 'b> WithdrawContext<'a, 'b> {
             token_program_info,
             system_program_info,
             rent_sysvar_info,
+            second_token_omnibus,
+            external_second_token_address_info,
         ) = match accounts {
-            [ a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13 ] => (
+            [ a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15 ] => (
                 a0, a1, a2, 
                 get_optional(a3),
                 get_optional(a4),
@@ -290,6 +292,8 @@ impl<'a, 'b> WithdrawContext<'a, 'b> {
                 a11,
                 get_optional(a12),
                 get_optional(a13),
+                get_optional(a14),
+                a15,
             ),
             _ => return Err(ProgramError::NotEnoughAccountKeys),
         };
@@ -309,6 +313,8 @@ impl<'a, 'b> WithdrawContext<'a, 'b> {
             token_program_info,
             system_program_info,
             rent_sysvar_info,
+            second_token_omnibus,
+            external_second_token_address_info,
         })
     }
 
@@ -392,3 +398,70 @@ impl<'a, 'b> WithdrawContext<'a, 'b> {
         Ok(())
     }
 }
+
+fn process_withdraw_from_dual_token(
+    ctx: &WithdrawContext,
+    data: &WithdrawIxData,
+) -> ProgramResult {
+    let account_index = match data {
+        WithdrawIxData::FromDualToken { account_index } => Ok(*account_index),
+        _ => Err(ProgramError::InvalidInstructionData),
+    }?;
+
+    // Validate required accounts
+    check_condition(
+        ctx.vm_memory_info.is_some() && 
+        ctx.vm_omnibus.is_some() &&
+        ctx.second_token_omnibus.is_some(),
+        "required accounts missing for dual token withdraw"
+    )?;
+
+    let vm = load_vm(ctx.vm_info)?;
+    let va = try_read(ctx.vm_memory_info.unwrap(), account_index)?;
+    let dual_token = va.into_inner_dual_token()
+        .ok_or(ProgramError::InvalidAccountData)?;
+
+    // Verify ownership and unlock state
+    check_condition(
+        dual_token.owner.eq(ctx.depositor_info.key),
+        "depositor does not match account owner"
+    )?;
+
+    // Calculate withdrawal amounts maintaining ratio
+    let token_amount = calculate_token_amount(
+        dual_token.kin_balance,
+        dual_token.ratio.token_parts as u64 / dual_token.ratio.kin_parts as u64
+    );
+
+    // Execute atomic withdrawals
+    transfer_signed(
+        ctx.vm_omnibus.unwrap(),
+        ctx.vm_omnibus.unwrap(), 
+        ctx.external_address_info,
+        ctx.token_program_info,
+        dual_token.kin_balance,
+        &[&[CODE_VM, VM_OMNIBUS, ctx.vm_info.key.as_ref(), &[vm.get_omnibus_bump()]]],
+    )?;
+
+    transfer_signed(
+        ctx.second_token_omnibus.unwrap(),
+        ctx.second_token_omnibus.unwrap(),
+        ctx.external_second_token_address_info,
+        ctx.token_program_info, 
+        token_amount,
+        &[&[CODE_VM, VM_SECOND_TOKEN_OMNIBUS, ctx.vm_info.key.as_ref(), &[vm.get_second_omnibus_bump()]]],
+    )?;
+
+    // Clear account after successful withdrawal
+    try_delete(ctx.vm_memory_info.unwrap(), account_index)?;
+
+    // Create withdrawal receipt
+    ctx.create_receipt(&Hash::new_from_array(dual_token.instance.try_into().unwrap()))?;
+
+    Ok(())
+}
+
+fn calculate_token_amount(kin_balance: u64, ratio: u64) -> u64 {
+    (kin_balance as f64 * ratio as f64) as u64
+}
+

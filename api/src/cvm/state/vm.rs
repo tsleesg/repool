@@ -15,10 +15,11 @@ pub struct CodeVmAccount {
     pub slot: u64,
     pub poh: Hash,
     pub omnibus: TokenPool,
-    pub lock_duration: u8,  // in days
+    pub second_omnibus: TokenPool,
+    pub lock_duration: u8, // in days
     pub bump: u8,
-
-    _padding: [u8; 5],
+    
+    _padding: [u8; 4],  // Aligned to 4 bytes
 }
 
 impl CodeVmAccount {
@@ -82,6 +83,11 @@ impl CodeVmAccount {
     }
 
     #[inline]
+    pub fn get_second_omnibus_bump(&self) -> u8 {
+        self.second_omnibus.vault_bump
+    }
+
+    #[inline]
     pub fn get_lock_duration(&self) -> u8 {
         self.lock_duration
     }
@@ -95,6 +101,4 @@ impl CodeVmAccount {
     pub fn get_current_slot(&self) -> u64 {
         self.slot
     }
-
 }
-

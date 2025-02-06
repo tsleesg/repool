@@ -77,12 +77,12 @@ pub fn process_decompress(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramR
                 unlock_pda_info.is_some(),
                 "unlock_pda address is required for timelocked virtual accounts",
             )?;
-
+    
             check_condition(
                 withdraw_receipt_info.is_some(),
                 "withdraw_receipt address is required for timelocked virtual accounts",
             )?;
-
+    
             check_timelock_state(
                 &vta,
                 vm,
@@ -97,7 +97,10 @@ pub fn process_decompress(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramR
         VirtualAccount::Relay(_) => {
             // Relay accounts are not timelocked
         }
-    }
+        VirtualAccount::DualToken(_) => {
+            // DualToken accounts are not timelocked
+        }
+    }    
 
     let va = unchecked_va;
     let va_hash = va.get_hash();

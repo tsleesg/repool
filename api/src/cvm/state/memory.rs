@@ -30,6 +30,14 @@ impl MemoryAccount {
         8 + std::mem::size_of::<Self>()
     }
 
+    pub fn set_num_accounts(&mut self, num_accounts: u32) {
+        self.num_accounts = num_accounts;
+    }
+
+    pub fn set_account_size(&mut self, account_size: u16) {
+        self.account_size = account_size;
+    }
+
     pub fn get_size_with_data(num_accounts: usize, account_size: usize) -> usize {
         Self::get_size() + SliceAllocator::get_size(num_accounts, account_size)
     }

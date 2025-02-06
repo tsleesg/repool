@@ -20,3 +20,6 @@ pub const NUM_ACCOUNTS: usize = 32_000;
 pub const COMPRESSED_STATE_DEPTH: usize = 20;
 pub const RELAY_STATE_DEPTH: usize = 63;
 pub const RELAY_HISTORY_ITEMS: usize = 32;
+
+pub const VM_SECOND_TOKEN_OMNIBUS: &[u8] = b"vm_second_token_omnibus";
+pub const VM_DUAL_DEPOSIT_PDA: &[u8] = b"vm_dual_deposit_pda";

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use code_vm_api::prelude::CodeInstruction;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer, transaction::Transaction};
 use litesvm::{types::{FailedTransactionMetadata, TransactionMetadata, TransactionResult}, LiteSVM};
-use litesvm_token::{CreateAssociatedTokenAccount, CreateMint, MintTo, spl_token::{state::Account}, get_spl_account};
+use litesvm_token::{CreateAssociatedTokenAccount, CreateMint, MintTo, spl_token::state::Account, get_spl_account};
 use pretty_hex::*;
 
 pub fn program_bytes() -> Vec<u8> {

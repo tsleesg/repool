@@ -6,6 +6,7 @@ use crate::{
     consts::*, types::{Hash, Signature}
 };
 
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum CodeInstruction {
@@ -27,6 +28,7 @@ pub enum CodeInstruction {
     SnapshotIx,
 
     DepositIx,
+    DualDepositIx,
     WithdrawIx,
     UnlockIx,
 }
@@ -369,4 +371,7 @@ pub enum WithdrawIxData {
     FromDeposit {
         bump: u8,
     } = 2,
+    FromDualToken {
+        account_index: u16,
+    } = 3,
 }

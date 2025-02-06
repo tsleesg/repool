@@ -1,4 +1,7 @@
 use code_vm_api::prelude::*;
+use code_vm_api::types::DualDepositIx;
+use solana_program::borsh::try_from_slice_unchecked;
+
 use steel::*;
 
 /*
@@ -104,4 +107,101 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     vm.advance_poh(CodeInstruction::DepositIx, accounts, data);
 
     Ok(())
+}
+
+pub fn process_dual_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    let args = try_from_slice_unchecked::<DualDepositIx>(data)?;
+    let [
+        vm_authority_info,
+        vm_info,
+        vm_memory_info,
+        depositor_info,
+        deposit_pda_info,
+        kin_deposit_ata_info,
+        token_deposit_ata_info,
+        kin_omnibus_info,
+        token_omnibus_info,
+        token_program_info,
+    ] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);        
+    };
+
+    // Standard checks
+    check_signer(vm_authority_info)?;
+    check_mut(vm_info)?;
+    check_mut(vm_memory_info)?;
+    check_mut(kin_deposit_ata_info)?;
+    check_mut(token_deposit_ata_info)?;
+    check_mut(kin_omnibus_info)?;
+    check_mut(token_omnibus_info)?;
+    check_program(token_program_info, &spl_token::id())?;
+
+    let vm = load_vm_checked(vm_info, vm_authority_info)?;
+
+    // Validate ratio and create account
+    let ratio = Ratio::new(args.kin_amount, args.token_amount);
+    
+    // Transfer KIN
+    transfer_signed(
+        deposit_pda_info,
+        kin_deposit_ata_info,
+        kin_omnibus_info,
+        token_program_info,
+        args.kin_amount,
+        &[&[
+            CODE_VM,
+            VM_DEPOSIT_PDA,
+            &depositor_info.key.to_bytes(),
+            &vm_info.key.to_bytes(),
+            &[args.kin_bump],
+        ]],
+    )?;
+
+    // Transfer second token 
+    transfer_signed(
+        deposit_pda_info,
+        token_deposit_ata_info,
+        token_omnibus_info,
+        token_program_info,
+        args.token_amount,
+        &[&[
+            CODE_VM,
+            VM_DEPOSIT_PDA,
+            &depositor_info.key.to_bytes(),
+            &vm_info.key.to_bytes(),
+            &[args.token_bump],
+        ]],
+    )?;
+
+    // Create and write virtual account
+    let instance_hash = Hash::new(vm.get_current_poh().as_ref());
+    let va = DualTokenAccount {
+        owner: *depositor_info.key,
+        kin_balance: args.kin_amount,
+        second_token_balance: args.token_amount,
+        ratio,
+        lock_duration: args.lock_duration,
+        unlock_time: calculate_unlock_time(args.lock_duration),
+        instance: vec![], // Convert current_poh to Vec<u8>
+        instance_hash,
+        bump: args.bump,
+        token_bump: args.token_bump,
+        unlock_bump: args.unlock_bump,
+        withdraw_bump: args.withdraw_bump,
+    };    
+
+    try_write(
+        vm_memory_info,
+        args.account_index,
+        &VirtualAccount::DualToken(va),
+    )?;
+
+    vm.advance_poh(CodeInstruction::DualDepositIx, accounts, data);
+
+    Ok(())
+}
+
+fn calculate_unlock_time(lock_duration: u8) -> i64 {
+    let current_time = Clock::get().unwrap().unix_timestamp;
+    current_time + (lock_duration as i64 * 24 * 60 * 60) // Convert days to seconds
 }

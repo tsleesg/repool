@@ -567,9 +567,11 @@ pub fn tx_withdraw_from_deposit(
         unlock_pda,
         None, // withdraw_receipt
         external_address,
+        Pubkey::default(), // external_second_token_address
+        None, // second_token_omnibus
         data,
     );
-
+    
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer_pk), &[payer, owner], blockhash);
 
     send_tx(svm, tx)
@@ -603,9 +605,11 @@ pub fn tx_withdraw_from_memory(
         unlock_pda,
         Some(withdraw_receipt),
         external_address,
+        Pubkey::default(), // external_second_token_address
+        None, // second_token_omnibus
         data,
     );
-
+    
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer_pk), &[payer, owner], blockhash);
 
     send_tx(svm, tx)
@@ -639,8 +643,10 @@ pub fn tx_withdraw_from_storage(
         unlock_pda,
         Some(withdraw_receipt),
         external_address,
+        Pubkey::default(), // external_second_token_address
+        None, // second_token_omnibus
         data,
-    );
+    );    
 
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer_pk), &[payer, owner], blockhash);
 
