@@ -1,0 +1,28 @@
+./program/tests/vm_memory_resize.rs:    let account_size = VirtualDurableNonce::LEN+1;
+./program/tests/system_decompress.rs:    let account_size = VirtualDurableNonce::LEN+1;
+./program/tests/utils/state.rs:pub fn get_virtual_nonce(svm: &LiteSVM, vm_memory: Pubkey, account_index: u16) -> VirtualDurableNonce {
+./program/tests/utils/state.rs:) -> (VirtualDurableNonce, Keypair) {
+./program/tests/utils/context.rs:    pub account: VirtualDurableNonce,
+./program/tests/vm_legacy_mem.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/system_nonce_init.rs:    let account_size = VirtualDurableNonce::LEN+1;
+./program/tests/system_compress.rs:    let account_size = VirtualDurableNonce::LEN+1;
+./program/tests/relay_transfer.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec.rs:    let mem_a = ctx.create_memory(100, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_memory_init.rs:    let account_size = VirtualDurableNonce::LEN+1;
+./program/tests/vm_exec_airdrop.rs:    let mem_a = ctx.create_memory(10, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec_airdrop.rs:    let mem_a = ctx.create_memory(10, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec_airdrop.rs:    let mem_a = ctx.create_memory(1, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/tests/vm_exec_airdrop.rs:    let mem_a = ctx.create_memory(10, VirtualDurableNonce::LEN + 1, "mem_nonce_0");
+./program/src/instruction/init_nonce.rs:    let vdn = VirtualDurableNonce {
+./api/src/cvm/account/nonce.rs:pub struct VirtualDurableNonce {
+./api/src/cvm/account/nonce.rs:impl VirtualDurableNonce {
+./api/src/cvm/account/nonce.rs:        let data = &buf[..VirtualDurableNonce::LEN];
+./api/src/cvm/account/virtual_account.rs:    VirtualDurableNonce,
+./api/src/cvm/account/virtual_account.rs:    Nonce(VirtualDurableNonce),
+./api/src/cvm/account/virtual_account.rs:            VirtualAccount::Nonce(_) => VirtualDurableNonce::LEN,
+./api/src/cvm/account/virtual_account.rs:                VirtualDurableNonce::unpack(data).unwrap()
+./api/src/cvm/account/virtual_account.rs:    pub fn into_inner_nonce(self) -> Option<VirtualDurableNonce> {
+./api/src/cvm/account/virtual_account.rs:        0 => VirtualDurableNonce::LEN,

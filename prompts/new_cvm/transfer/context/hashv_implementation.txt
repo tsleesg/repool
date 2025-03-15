@@ -1,0 +1,2 @@
+./api/src/utils/hash.rs:    pub fn hashv(&mut self, vals: &[&[u8]]) {
+./api/src/utils/hash.rs:pub fn hashv(vals: &[&[u8]]) -> Hash {

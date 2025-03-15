@@ -1,0 +1,41 @@
+--
+--
+--
+--
+--
+program/src/opcode/airdrop.rs-132-        &vm,
+program/src/opcode/airdrop.rs-133-        &src_vta,
+program/src/opcode/airdrop.rs-134-        &dst_pubkeys,
+program/src/opcode/airdrop.rs-135-        args.amount,
+program/src/opcode/airdrop.rs-136-        &vdn,
+program/src/opcode/airdrop.rs:131:    let hash = create_airdrop_message(
+program/src/opcode/conditional_transfer.rs-118-        &vm,
+program/src/opcode/conditional_transfer.rs-119-        &src_vta, 
+program/src/opcode/conditional_transfer.rs-120-        &vra.target, 
+program/src/opcode/conditional_transfer.rs-121-        &vdn, 
+program/src/opcode/conditional_transfer.rs-122-        args.amount
+program/src/opcode/conditional_transfer.rs:117:    let hash = create_transfer_message_to_external(
+program/src/opcode/external_transfer.rs-103-        &vm,
+program/src/opcode/external_transfer.rs-104-        &src_vta, 
+program/src/opcode/external_transfer.rs-105-        &dst_pubkey, 
+program/src/opcode/external_transfer.rs-106-        &vdn, 
+program/src/opcode/external_transfer.rs-107-        args.amount
+program/src/opcode/external_transfer.rs:102:    let hash = create_transfer_message_to_external(
+program/src/opcode/external_withdraw.rs-105-        &vm,
+program/src/opcode/external_withdraw.rs-106-        &src_vta, 
+program/src/opcode/external_withdraw.rs-107-        &dst_pubkey, 
+program/src/opcode/external_withdraw.rs-108-        &vdn, 
+program/src/opcode/external_withdraw.rs-109-    );
+program/src/opcode/external_withdraw.rs:104:    let hash = create_withdraw_message_to_external(
+program/src/opcode/transfer.rs-90-        &vm,
+program/src/opcode/transfer.rs-91-        &src_vta, 
+program/src/opcode/transfer.rs-92-        &dst_vta, 
+program/src/opcode/transfer.rs-93-        &vdn, 
+program/src/opcode/transfer.rs-94-        args.amount
+program/src/opcode/transfer.rs:89:    let hash = create_transfer_message(
+program/src/opcode/withdraw.rs-92-        &vm,
+program/src/opcode/withdraw.rs-93-        &src_vta, 
+program/src/opcode/withdraw.rs-94-        &dst_vta, 
+program/src/opcode/withdraw.rs-95-        &vdn, 
+program/src/opcode/withdraw.rs-96-    );
+program/src/opcode/withdraw.rs:91:    let hash = create_withdraw_message(

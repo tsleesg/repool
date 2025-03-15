@@ -1,0 +1,9 @@
+./program/tests/vm_legacy_mem.rs:    let hash = create_transfer_message(
+./program/tests/relay_transfer.rs:    let conditional_payment = create_transfer_message_to_external(
+./program/tests/vm_exec.rs:    let hash = create_transfer_message(
+./program/tests/vm_exec.rs:    let hash = create_transfer_message_to_external(
+./program/src/opcode/external_transfer.rs:    let hash = create_transfer_message_to_external(
+./program/src/opcode/conditional_transfer.rs:    let hash = create_transfer_message_to_external(
+./program/src/opcode/transfer.rs:    let hash = create_transfer_message(
+./api/src/cvm/messages/transfer.rs:pub fn create_transfer_message(
+./api/src/cvm/messages/transfer.rs:pub fn create_transfer_message_to_external(

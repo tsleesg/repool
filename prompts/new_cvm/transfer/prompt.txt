@@ -1,0 +1,27 @@
+Prompt:
+Create a transfer.rs script that implements token transfer functionality between accounts. The file should include three functions:
+
+1. compact_transfer_message - which should take source and destination timelock addresses, an amount, and a virtual durable nonce, then return a Hash
+2. create_transfer_message - for transfers between two virtual timelock accounts
+3. create_transfer_message_to_external - for transfers from a virtual timelock account to an external account
+
+For message construction, follow the exact pattern in the compact_airdrop_message function from reference message airdrop.rs, but adapt it for transfers. Pay special attention to:
+- use direct array construction &[...] instead of building a Vec
+let message = &[...];
+utils::hashv(message)
+
+- syntax for creating the message array
+- using utils::hashv in the same way
+- exact ordering of message components (operation name, addresses, amount, nonce values)
+Component ordering must come from the opcode transfer.rs 
+
+Follow existing patterns for deriving timelock and token addresses in the other two functions, matching the style seen in the existing message files.
+
+context: function_signatures_with_context.txt address_patterns.txt 
+virtual_durable_nonce_usage.txt hashv_implementation.txt durable_nonce_docs.txt create_transfer_message_calls.txt
+
+
+Clean up prompt:
+Check the script to ensure no redundant explicit casts.
+Prefer conversion in array construction over creating separate variables.
+Correct component ordering matching opcode transfer.rs

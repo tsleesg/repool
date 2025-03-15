@@ -1,0 +1,4 @@
+Use the prompt with the provided context files. 
+Use a model like GPT-40 or Claude 3.7 Sonnet.
+
+Check the component ordering in the messages in the generated code.
