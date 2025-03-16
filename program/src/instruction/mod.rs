@@ -13,6 +13,7 @@ mod resize;
 mod snapshot;
 mod unlock;
 mod withdraw;
+mod voting;
 
 pub use compress::*;
 pub use decompress::*;
@@ -29,3 +30,4 @@ pub use resize::*;
 pub use snapshot::*;
 pub use unlock::*;
 pub use withdraw::*;
+pub use voting::*;

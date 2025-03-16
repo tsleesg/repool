@@ -34,9 +34,11 @@ pub fn process_instruction(
         CodeInstruction::SnapshotIx      => process_snapshot(accounts, data)?,
 
         CodeInstruction::DepositIx       => process_deposit(accounts, data)?,
-        CodeInstruction::DualDepositIx => process_dual_deposit(accounts, data)?,
+        CodeInstruction::DualDepositIx   => process_dual_deposit(accounts, data)?,
         CodeInstruction::WithdrawIx      => process_withdraw(accounts, data)?,
         CodeInstruction::UnlockIx        => process_unlock(accounts, data)?,
+        
+        CodeInstruction::VotingIx        => process_voting(accounts, data)?,
     }
 
     Ok(())

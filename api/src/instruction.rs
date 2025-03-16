@@ -6,7 +6,6 @@ use crate::{
     consts::*, types::{Hash, Signature}
 };
 
-
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum CodeInstruction {
@@ -31,6 +30,7 @@ pub enum CodeInstruction {
     DualDepositIx,
     WithdrawIx,
     UnlockIx,
+    VotingIx,
 }
 
 instruction!(CodeInstruction, InitVmIx);
@@ -51,6 +51,39 @@ instruction!(CodeInstruction, SnapshotIx);
 instruction!(CodeInstruction, DepositIx);
 instruction!(CodeInstruction, WithdrawIx);
 instruction!(CodeInstruction, UnlockIx);
+
+instruction!(CodeInstruction, VotingIx);
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct VotingIx {
+    // Dynamically sized data, not supported by Steel
+    _data: PhantomData<VotingIxData>,
+}
+
+impl VotingIx {
+    pub fn try_from_slice(data: &[u8]) -> Result<VotingIxData, std::io::Error> {
+        VotingIxData::try_from_slice(data)
+    }
+
+    pub fn try_to_bytes(args: VotingIxData) -> Result<Vec<u8>, std::io::Error> {
+        let discriminator = CodeInstruction::VotingIx as u8;
+        let data = args.try_to_vec()?;
+        let mut result = Vec::with_capacity(1 + data.len());
+        result.push(discriminator);
+        result.extend_from_slice(&data);
+        Ok(result)
+    }
+}
+
+#[repr(C)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+pub struct VotingIxData {
+    pub opcode: u8,
+    pub mem_indicies: Vec<u16>,
+    pub mem_banks: Vec<u8>,
+    pub data: Vec<u8>,
+}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]

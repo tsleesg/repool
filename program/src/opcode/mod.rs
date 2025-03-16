@@ -6,6 +6,7 @@ mod external_withdraw;
 mod relay;
 mod transfer;
 mod withdraw;
+mod voting;
 
 pub use airdrop::*;
 pub use conditional_transfer::*;
@@ -15,3 +16,4 @@ pub use external_withdraw::*;
 pub use relay::*;
 pub use transfer::*;
 pub use withdraw::*;
+pub use voting::*;
